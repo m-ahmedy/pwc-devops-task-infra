@@ -1,0 +1,11 @@
+resources:
+  - ../../base
+
+namePrefix: prod-
+
+commonLabels:
+  env: prod
+
+images:
+  - name: simple-web-app
+    newTag: v1.0.0

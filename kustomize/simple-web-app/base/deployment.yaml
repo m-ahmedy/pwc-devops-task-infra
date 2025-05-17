@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: simple-web-app
+  name: simple-web-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-web-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: simple-web-app
+    spec:
+      containers:
+      - image: simple-web-app
+        name: simple-web-app
+      ports:
+      - containerPort: 5000

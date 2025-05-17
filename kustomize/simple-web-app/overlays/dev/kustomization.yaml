@@ -1,0 +1,11 @@
+resources:
+  - ../../base
+
+namePrefix: dev-
+
+commonLabels:
+  env: dev
+
+images:
+  - name: simple-web-app
+    newTag: v1.0.0

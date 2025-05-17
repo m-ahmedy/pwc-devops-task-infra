@@ -1,0 +1,4 @@
+resource_group_name  = "tf-backend-rg"
+storage_account_name = "tfbackendpwc15052025"
+container_name       = "tfstate"
+key                  = "prod.terraform.tfstate"

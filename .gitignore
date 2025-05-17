@@ -1,0 +1,12 @@
+
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/.terraform.lock.hcl
+**/.terraform/
+
+
+argocd/output/**
+
+**/.env
+
+**/kubeconfig.*

@@ -1,0 +1,3 @@
+location = "East US"
+resource_group_name = "tf-backend-rg"
+storage_account_name = "tfbackendpwc15052025"
