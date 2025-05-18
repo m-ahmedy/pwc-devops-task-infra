@@ -1,0 +1,35 @@
+name: Deploy Application to Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_tag:
+        description: "New image tag (e.g., v1.0, v1.1, etc)"
+        required: true
+        default: "latest"
+      env:
+        description: "Target environment (e.g., dev, staging or prod)"
+        required: true
+        default: "dev"
+
+permissions:
+    contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Update Target Environment Image Tag
+        run: |
+          yq e '.images[0].newTag = "${{ github.event.inputs.new_tag }}"' -i kustomize/${{ vars.APP_NAME }}/overlays/${{ github.event.inputs.env }}/kustomization.yaml
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add kustomize/${{ vars.APP_NAME }}/overlays/${{ github.event.inputs.env }}/kustomization.yaml
+          git commit -m "Deploy new image tag ${{ github.event.inputs.new_tag }} to ${{ github.event.inputs.env }}"
+          git push
