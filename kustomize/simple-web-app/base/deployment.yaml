@@ -23,5 +23,5 @@ spec:
       containers:
       - image: simple-web-app
         name: simple-web-app
-      ports:
-      - containerPort: 5000
+        ports:
+        - containerPort: 5000
