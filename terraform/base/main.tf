@@ -25,6 +25,8 @@ module "aks_cluster" {
 }
 
 module "container_registry" {
+    count = var.environment == "dev" ? 1 : 0
+
     source = "../modules/acr"
     location            = var.location
     environment         = var.environment
@@ -34,9 +36,13 @@ module "container_registry" {
     registry_name = var.registry_name
 }
 
-resource "azurerm_role_assignment" "AcrPull" {
-  principal_id                     = module.aks_cluster.object_id
-  role_definition_name             = "AcrPull"
-  scope                            = module.container_registry.registry_id
-  skip_service_principal_aad_check = true
+module "acr_cluster_bindings" {
+  source = "../modules/acr_cluster_binding"
+
+  acr_name = data.azurerm_container_registry.acr.name
+  acr_id = data.azurerm_container_registry.acr.id
+  acr_registry_group = data.azurerm_container_registry.acr.resource_group_name
+
+  environment = var.environment
+  cluster_object_id = module.aks_cluster.object_id
 }

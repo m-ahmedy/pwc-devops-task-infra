@@ -4,5 +4,9 @@ output "aks_cluster_outputs" {
 }
 
 output "container_registry_outputs" {
-    value = module.container_registry
+    value = data.azurerm_container_registry.acr.login_server
+}
+
+output "acr_cluster_binding_token_name" {
+    value = module.acr_cluster_bindings.token_name
 }
