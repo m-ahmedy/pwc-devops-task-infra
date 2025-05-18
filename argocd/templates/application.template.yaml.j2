@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ app_name }}
+  name: {{ environment}}-{{ app_name }}
   namespace: argocd
   labels:
     name: {{ app_name }}

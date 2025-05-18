@@ -64,6 +64,11 @@ variables = [
         "template_var": "image_registry_server",
         "description": "the server hosting the image",
     },
+    {
+        "env_var": "ENVIRONMENT",
+        "template_var": "environment",
+        "description": "the deployment environment",
+    },
 ]
 
 template_vars = {}
