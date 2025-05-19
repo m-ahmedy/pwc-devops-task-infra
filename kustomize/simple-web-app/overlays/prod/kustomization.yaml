@@ -1,11 +1,6 @@
 resources:
   - ../../base
-
 namePrefix: prod-
-
-commonLabels:
-  env: prod
-
 images:
   - name: simple-web-app
-    newTag: v1.0.0
+    newTag: 6339c278a7c484a899f891d1927eb26e2f975b59
