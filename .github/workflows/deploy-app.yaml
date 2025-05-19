@@ -12,7 +12,7 @@ on:
         description: "New image tag (e.g., v1.0, v1.1, etc)"
         required: true
         default: "latest"
-      env:
+      environment:
         description: "Target environment (e.g., dev, prod)"
         required: true
         default: "dev"
@@ -30,14 +30,14 @@ on:
         required: true
         type: string
         default: "latest"
-      env:
+      environment:
         description: "Target environment (e.g., dev, staging or prod)"
         required: true
         type: string
         default: "dev"
 
     secrets:
-      GH_TOKEN:
+      DEPLOY_TOKEN:
         required: true
 
 permissions:
@@ -52,13 +52,15 @@ jobs:
 
       - name: Update Target Environment Image Tag
         run: |
-          yq e '.images[0].newTag = "${{ github.event.inputs.new_tag }}"' -i kustomize/${{ vars.APP_NAME }}/overlays/${{ github.event.inputs.env }}/kustomization.yaml
+          yq e '.images[0].newTag = "${{ inputs.new_tag }}"' -i kustomize/${{ vars.APP_NAME }}/overlays/${{ inputs.environment }}/kustomization.yaml
 
       - name: Commit and Push
         run: |
           CALLER="${{ github.event_name }}-${{ inputs.caller }}"
+          GITHUB_TOKEN=${{ secrets.DEPLOY_TOKEN }}
+
           git config user.name "gh-actions-$CALLER"
           git config user.email "github-actions@github.com"
-          git add kustomize/${{ vars.APP_NAME }}/overlays/${{ github.event.inputs.env }}/kustomization.yaml
-          git commit -m "Deploy new image tag ${{ github.event.inputs.new_tag }} to ${{ github.event.inputs.env }} by $CALLER"
+          git add kustomize/${{ vars.APP_NAME }}/overlays/${{ inputs.environment }}/kustomization.yaml
+          git commit -m "Deploy new image tag ${{ inputs.new_tag }} to ${{ inputs.environment }} by $CALLER"
           git push
