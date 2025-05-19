@@ -1,0 +1,23 @@
+name: Infra CI
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+    branches:
+      - "main"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-ci-dev:
+    uses: ./.github/workflows/terraform-plan-env.yaml
+    with:
+      environment: dev
+
+  terraform-ci-prod:
+    uses: ./.github/workflows/terraform-plan-env.yaml
+    with:
+      environment: prod

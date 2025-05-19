@@ -3,17 +3,45 @@ name: Deploy Application to Environment
 on:
   workflow_dispatch:
     inputs:
+      caller:
+        description: "Workflow caller"
+        required: true
+        type: string
+        default: "manual"
       new_tag:
         description: "New image tag (e.g., v1.0, v1.1, etc)"
         required: true
         default: "latest"
       env:
-        description: "Target environment (e.g., dev, staging or prod)"
+        description: "Target environment (e.g., dev, prod)"
         required: true
         default: "dev"
 
+  workflow_call:
+    inputs:
+      caller:
+        description: "Workflow caller"
+        required: true
+        type: string
+        default: "automatic"
+
+      new_tag:
+        description: "New image tag (e.g., v1.0, v1.1, etc)"
+        required: true
+        type: string
+        default: "latest"
+      env:
+        description: "Target environment (e.g., dev, staging or prod)"
+        required: true
+        type: string
+        default: "dev"
+
+    secrets:
+      GH_TOKEN:
+        required: true
+
 permissions:
-    contents: write
+  contents: write
 
 jobs:
   deploy:
@@ -28,8 +56,9 @@ jobs:
 
       - name: Commit and Push
         run: |
-          git config user.name "github-actions"
+          CALLER="${{ github.event_name }}-${{ inputs.caller }}"
+          git config user.name "gh-actions-$CALLER"
           git config user.email "github-actions@github.com"
           git add kustomize/${{ vars.APP_NAME }}/overlays/${{ github.event.inputs.env }}/kustomization.yaml
-          git commit -m "Deploy new image tag ${{ github.event.inputs.new_tag }} to ${{ github.event.inputs.env }}"
+          git commit -m "Deploy new image tag ${{ github.event.inputs.new_tag }} to ${{ github.event.inputs.env }} by $CALLER"
           git push

@@ -1,0 +1,46 @@
+name: Terraform Apply Environment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        description: Target environment (dev, prod).
+        type: string
+
+env:
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-apply-env:
+    runs-on: ubuntu-latest
+    name: Terraform Apply (${{ inputs.environment }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ./terraform/environments/${{ inputs.environment }}
+        run: terraform init -backend-config=./terraform.tfbackend
+
+      - name: Terraform Apply (${{ inputs.environment }})
+        working-directory: ./terraform/environments/${{ inputs.environment }}
+        run: terraform apply -auto-approve -var-file=./terraform.tfvars

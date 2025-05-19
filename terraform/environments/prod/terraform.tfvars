@@ -1,13 +1,17 @@
 
-location            = "East US"
-environment         = "prod"
+location    = "East US"
+environment = "prod"
 
-registry_resource_group_name = "rg-pwc-dev-acr"
-registry_name       = "pwcdevacr"
-registry_sku        = "Standard"
+registry_config = {
+  resource_group_name = "pwc-dev-acr-rg"
+  name                = "pwcdevacr"
+  sku                 = "Standard"
+}
 
-cluster_resource_group_name = "rg-pwc-prod-cluster"
-cluster_name        = "pwc-prod-cluster"
-cluster_dns_prefix  = "pwcprodcluster"
-cluster_node_count  = 2
-cluster_vm_size     = "standard_a2_v2"
+cluster_config = {
+  resource_group_name = "pwc-prod-cluster-rg"
+  name       = "pwc-prod-cluster"
+  dns_prefix = "pwcprodcluster"
+  node_count = 2
+  vm_size    = "standard_a2_v2"
+}
