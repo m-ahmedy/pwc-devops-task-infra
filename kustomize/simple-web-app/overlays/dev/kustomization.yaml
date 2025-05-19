@@ -4,3 +4,4 @@ namePrefix: dev-
 images:
   - name: simple-web-app
     newTag: latest
+    newName: pwcdevacr.azurecr.io/simple-web-app

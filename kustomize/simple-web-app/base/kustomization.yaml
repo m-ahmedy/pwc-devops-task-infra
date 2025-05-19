@@ -1,6 +1,3 @@
 resources:
   - deployment.yaml
   - service.yaml
-images:
-  - name: simple-web-app
-    newName: pwcdevacr.azurecr.io/simple-web-app
