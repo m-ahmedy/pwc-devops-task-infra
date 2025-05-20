@@ -9,9 +9,6 @@ argocd/output/**
 
 **/.env
 
-**/*kubeconfig*
-*kubeconfig*
-
 scripts/**/*.json
 
 .act/**

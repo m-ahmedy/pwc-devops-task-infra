@@ -55,19 +55,10 @@ variables = [
         "description": "the destination Kubernetes server",
     },
     {
-        "env_var": "PATH_IN_REPO",
-        "template_var": "path_in_repo",
-        "description": "the path in the repository for the application",
-    },
-    {
-        "env_var": "IMAGE_REGISTRY_SERVER",
-        "template_var": "image_registry_server",
-        "description": "the server hosting the image",
-    },
-    {
-        "env_var": "ENVIRONMENT",
-        "template_var": "environment",
-        "description": "the deployment environment",
+        "env_var": "ENVIRONMENTS",
+        "template_var": "environments",
+        "description": "the deployment environments",
+        "list": True
     },
 ]
 
@@ -80,6 +71,9 @@ for var in variables:
         var_value = input(f"Please input {var['description']}: ")
     else:
         print(f"Using {var['env_var']} from environment.")
+
+        if var.get("list"):
+            var_value = var_value.split(",")
 
     template_vars[var["template_var"]] = var_value
 

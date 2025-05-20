@@ -2,7 +2,9 @@
 
 set -e
 
-TERRAFORM_SP_ID=$(az ad sp list --display-name=terraform-sp --query "[].id" --output tsv)
+read -p "Enter the service principal display name: " SP_NAME
+
+TERRAFORM_SP_ID=$(az ad sp list --display-name=$SP_NAME --query "[].id" --output tsv)
 
 read -p "Enter the Resource Manager (Storage Container) resource ID: " RESOURCE_ID
 

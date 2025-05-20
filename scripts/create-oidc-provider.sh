@@ -4,6 +4,7 @@ set -e
 
 read -p "Enter GitHub repository owner: " OWNER
 read -p "Enter GitHub repository name: " REPO
+read -p "Enter GitHub repository environment: " ENVIRONMENT
 read -p "Enter Azure service principal name: " SP_NAME
 
 appId=$(az ad sp list --display-name "$SP_NAME" --query '[0].appId' -o tsv)
@@ -17,6 +18,6 @@ az ad app federated-credential create --id $appId \
   --parameters '{
     "name": "github-oidc",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:'"$OWNER/$REPO"':ref:refs/heads/*",
+    "subjectRegex": "repo:'"$OWNER/$REPO"':environment:'"$ENVIRONMENT"'",
     "audiences": ["api://AzureADTokenExchange"]
   }'

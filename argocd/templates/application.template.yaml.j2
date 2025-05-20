@@ -1,3 +1,5 @@
+{% for environment in environments %}
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,7 +13,7 @@ spec:
   source:
     repoURL: {{ repo_url }}
     targetRevision: HEAD
-    path: {{ path_in_repo }}
+    path: kustomize/{{ app_name }}/overlays/{{ environment }}
 
   destination:
     server: {{ dest_server }}
@@ -23,3 +25,6 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+
+---
+{% endfor %}

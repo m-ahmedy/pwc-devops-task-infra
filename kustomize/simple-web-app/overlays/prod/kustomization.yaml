@@ -2,6 +2,4 @@ resources:
   - ../../base
 namePrefix: prod-
 images:
-  - name: simple-web-app
-    newTag: 6339c278a7c484a899f891d1927eb26e2f975b59
-    newName: pwcdevacr.azurecr.io/simple-web-app
+  - name: pwcdevacr.azurecr.io/simple-web-app

@@ -21,7 +21,7 @@ spec:
         app: simple-web-app
     spec:
       containers:
-      - image: simple-web-app
+      - image: pwcdevacr.azurecr.io/simple-web-app
         name: simple-web-app
         ports:
         - containerPort: 5000
