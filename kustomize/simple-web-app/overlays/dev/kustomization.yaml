@@ -3,4 +3,4 @@ resources:
 namePrefix: dev-
 images:
   - name: pwcdevacr.azurecr.io/simple-web-app
-    newTag: 290310f420c6e0ec2f26a37a63438d1b33519ef4
+    newTag: a113058dbfddbe2970e60ae4fdf19e1471546c5c
