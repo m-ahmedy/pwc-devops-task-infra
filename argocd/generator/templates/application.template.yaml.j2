@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ environment }}-{{ app_name }}
+  name: {{ environment.name }}-{{ app_name }}
   namespace: argocd
   labels:
     name: {{ app_name }}
@@ -13,11 +13,11 @@ spec:
   source:
     repoURL: {{ repo_url }}
     targetRevision: HEAD
-    path: kustomize/{{ app_name }}/overlays/{{ environment }}
+    path: kustomize/{{ app_name }}/overlays/{{ environment.name }}
 
   destination:
-    name: {{ dest_cluster_name }}
-    namespace: {{ dest_namespace }}
+    name: {{ environment.cluster_name }}
+    namespace: {{ destination_namespace }}
 
   syncPolicy:
     automated:

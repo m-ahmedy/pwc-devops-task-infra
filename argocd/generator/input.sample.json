@@ -1,0 +1,15 @@
+{
+    "repo_url": "",
+    "repo_name": "",
+    "repo_username": "",
+    "repo_token": "",
+    "project_name": "",
+    "app_name": "",
+    "destination_namespace": "",
+    "environments": [
+        {
+            "name": "",
+            "cluster_name": ""
+        }
+    ]
+}

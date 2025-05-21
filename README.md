@@ -188,24 +188,42 @@ argocd cluster add <context-name>
 
 Repeat for each environment (e.g., dev, prod) to allow ArgoCD to manage resources in those clusters.
 
+### Create the App of Apps root app
+
+The **App of Apps** architecture in ArgoCD is a pattern where a single "root" ArgoCD Application manages other ArgoCD Application resources. This enables you to declaratively manage multiple applications and environments from a single entry point, improving scalability and maintainability.
+
+To apply the root App of Apps manifest, run:
+
+```sh
+kubectl apply -f ./argocd/root/root.yaml
+```
+
+This will create the root ArgoCD Application, which in turn will create and manage all child applications as defined in the manifest.
+
 ### Generate ArgoCD Manifests
 
 Generate ArgoCD manifests using the automation script:
 
 ```sh
-cd ./argocd
+cd ./argocd/generator
 pip install -r requirements.txt
 python3 main.py
 ```
 
 Set environment variables:
 
-- `REPO_URL`, `REPO_NAME`, `REPO_USERNAME`, `REPO_TOKEN`, `PROJECT_NAME`, `APP_NAME`, `DEST_NAMESPACE`, `DEST_SERVER`, `ENVIRONMENTS`
+- `REPO_URL`, `REPO_NAME`, `REPO_USERNAME`, `REPO_TOKEN`, `PROJECT_NAME`, `APP_NAME`, `DEST_NAMESPACE`, `DEST_CLUSTER_NAME`, `ENVIRONMENTS`
 
 Apply manifests:
 
 ```sh
 kubectl apply -f ./output/
+```
+
+### Copy the generated application manifest to `the argocd/apps` directory
+
+```
+cp argocd/generator/output/application.yaml argocd/apps/<APP_NAME>.yaml
 ```
 
 ### Access the App
