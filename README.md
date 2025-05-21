@@ -9,23 +9,23 @@ This repository contains the infrastructure setup for the PwC DevOps Task. It in
 1. [Directory Structure](#directory-structure)
 2. [Prerequisites](#prerequisites)
 3. [Repository & GitHub Setup](#repository--github-setup)
-  - [Repository Variables](#repository-variables)
   - [Personal Access Tokens (PATs)](#personal-access-tokens-pats)
+  - [Repository Variables](#repository-variables)
   - [GitHub Environments](#github-environments)
 4. [Azure & Terraform Setup](#azure--terraform-setup)
   - [Login to Azure](#login-to-azure)
-  - [Create Terraform Service Principal](#create-terraform-service-principal)
-  - [Configure OIDC Federated Credentials](#configure-oidc-federated-credentials)
-  - [Create Backend Storage](#create-backend-storage)
-  - [Assign Data Contributor Role](#assign-data-contributor-role)
+  - [Create Prerequisties Resources](#create-prerequisties-resources)
   - [Create Infrastructure Environments](#create-infrastructure-environments)
 5. [Kubernetes & ArgoCD Setup](#kubernetes--argocd-setup)
   - [Get Cluster Kubeconfig](#get-cluster-kubeconfig)
   - [Generate ACR Tokens](#generate-acr-tokens)
   - [Run Deployment Workflow](#run-deployment-workflow)
   - [Install ArgoCD](#install-argocd)
-  - [Generate ArgoCD Manifests](#generate-argocd-manifests)
   - [Log in to ArgoCD](#log-in-to-argocd)
+  - [Import Clusters](#import-clusters)
+  - [Create the App of Apps root app](#create-the-app-of-apps-root-app)
+  - [Generate ArgoCD Manifests](#generate-argocd-manifests)
+  - [Copy the generated application manifest to the argocd/apps directory](#copy-the-generated-application-manifest-to-the-argocdapps-directory)
   - [Access the App](#access-the-app)
 
 ---
@@ -150,7 +150,7 @@ Run the deployment workflow in the application code repo to build and push a Doc
 
 ### Install ArgoCD
 
-Install ArgoCD into your Kubernetes cluster, only on prod environment environment:
+Install ArgoCD into your Kubernetes cluster, only on prod environment:
 
 - [Install ArgoCD](./scripts/install-argocd.sh)
 
@@ -210,9 +210,9 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-Set environment variables:
+Set up your `input.json` file with values similar to the provided [`input.sample.json`](./argocd/generator/input.sample.json) template. This file should contain environment-specific configuration such as application name, namespaces, image tags, and other deployment parameters.
 
-- `REPO_URL`, `REPO_NAME`, `REPO_USERNAME`, `REPO_TOKEN`, `PROJECT_NAME`, `APP_NAME`, `DEST_NAMESPACE`, `DEST_CLUSTER_NAME`, `ENVIRONMENTS`
+Update the values as needed for your deployment scenario before running the generator script.
 
 Apply manifests:
 

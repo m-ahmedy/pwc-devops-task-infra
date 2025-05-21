@@ -17,25 +17,3 @@ spec:
       prune: true
       selfHeal: true
       allowEmpty: true
-
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: app-of-projects
-  namespace: argocd
-spec:
-  project: default
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  source:
-    path: argocd/projects
-    repoURL: https://github.com/m-ahmedy/pwc-devops-task-infra.git
-    targetRevision: HEAD
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-      allowEmpty: true
-
