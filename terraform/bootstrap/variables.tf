@@ -13,3 +13,18 @@ variable "location" {
   type        = string
   description = "Azure region"
 }
+
+variable "environments" {
+  type = set(string)
+  description = "Environments"
+}
+
+variable "infra_repo_owner" {
+  type        = string
+  description = "The owner name of the infra repo"
+}
+
+variable "infra_repo_name" {
+  type        = string
+  description = "The name of the infra repo"
+}

@@ -24,6 +24,8 @@ jobs:
   terraform-destroy-env:
     runs-on: ubuntu-latest
     name: Terraform Destroy (${{ inputs.environment }})
+    environment:
+      name: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
 

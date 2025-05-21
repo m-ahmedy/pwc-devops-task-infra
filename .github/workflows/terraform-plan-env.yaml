@@ -24,6 +24,8 @@ jobs:
   terraform-plan-env:
     runs-on: ubuntu-latest
     name: Terraform Plan for ${{ inputs.environment }}
+    environment:
+      name: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
 

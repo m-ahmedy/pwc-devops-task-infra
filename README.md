@@ -2,175 +2,195 @@
 
 This repository contains the infrastructure setup for the PwC DevOps Task. It includes configuration files, scripts, and instructions to provision and manage the required cloud resources using Infrastructure as Code (IaC) tools.
 
+---
+
+## Table of Contents
+
+1. [Directory Structure](#directory-structure)
+2. [Prerequisites](#prerequisites)
+3. [Repository & GitHub Setup](#repository--github-setup)
+  - [Repository Variables](#repository-variables)
+  - [Personal Access Tokens (PATs)](#personal-access-tokens-pats)
+  - [GitHub Environments](#github-environments)
+4. [Azure & Terraform Setup](#azure--terraform-setup)
+  - [Login to Azure](#login-to-azure)
+  - [Create Terraform Service Principal](#create-terraform-service-principal)
+  - [Configure OIDC Federated Credentials](#configure-oidc-federated-credentials)
+  - [Create Backend Storage](#create-backend-storage)
+  - [Assign Data Contributor Role](#assign-data-contributor-role)
+  - [Create Infrastructure Environments](#create-infrastructure-environments)
+5. [Kubernetes & ArgoCD Setup](#kubernetes--argocd-setup)
+  - [Get Cluster Kubeconfig](#get-cluster-kubeconfig)
+  - [Generate ACR Tokens](#generate-acr-tokens)
+  - [Run Deployment Workflow](#run-deployment-workflow)
+  - [Install ArgoCD](#install-argocd)
+  - [Generate ArgoCD Manifests](#generate-argocd-manifests)
+  - [Log in to ArgoCD](#log-in-to-argocd)
+  - [Access the App](#access-the-app)
+
+---
+
 ## Directory Structure
 
 ```
 infra/
 ├── README.md
-├── .github/workflows/   # Containing GitHub Actions CI/CD workflows
+├── .github/workflows/   # GitHub Actions CI/CD workflows
 ├── terraform/           # Terraform scripts for infrastructure provisioning
 ├── kustomize/           # Kubernetes manifests in Kustomize definitions
 ├── scripts/             # Helper scripts for automation
 └── argocd/              # Helper automation for generating templated ArgoCD manifests
 ```
 
+---
+
 ## Prerequisites
 
-Before you begin, ensure you have the following tools installed:
+Ensure you have the following tools installed:
 
 - [Git](https://git-scm.com/)
+- [GitHub CLI](https://cli.github.com/)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - [Terraform](https://www.terraform.io/downloads.html)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Docker](https://docs.docker.com/get-docker/) (optional)
 - [ArgoCD CLI](https://argo-cd.readthedocs.io/en/stable/cli_installation/) (optional)
 
-## Deployment Instructions
+---
 
-### GitHub Repository Configuration
+## Repository & GitHub Setup
 
-Before deploying, configure the following in your GitHub repository:
 
-- **Repository Variables**:
-  - `AZURE_CLIENT_ID`: Azure service principal client ID.
-  - `AZURE_SUBSCRIPTION_ID`: Azure subscription ID.
-  - `AZURE_TENANT_ID`: Azure tenant ID.
+### Personal Access Tokens (PATs)
 
-### GitHub Personal Access Tokens (PATs)
+Create two GitHub PATs:
 
-Create two GitHub Personal Access Tokens for integration:
+- **ArgoCD Read Access PAT**: `repo:read` (for ArgoCD to sync manifests)
+- **Deployments Write Access PAT**: `repo:write`, `workflow` (for CI/CD workflows)
 
-- **ArgoCD Read Access PAT**:
+Store these as secrets in the `dev` and `prod` GitHub environments.
 
-  - Scope: `repo:read`
-  - Purpose: Allows ArgoCD to read repository contents for syncing manifests.
 
-- **Deployments Write Access PAT**:
-  - Scope: `repo:write`, `workflow`
-  - Purpose: Enables CI/CD workflows to push changes and trigger deployments.
+### Repository Variables
 
-Store these tokens as secrets in the appropriate GitHub environments (`dev` and `prod`) for secure access.
+Configure these in your GitHub repository:
+
+- `AZURE_CLIENT_ID`: Azure service principal client ID.
+- `AZURE_SUBSCRIPTION_ID`: Azure subscription ID.
+- `AZURE_TENANT_ID`: Azure tenant ID.
 
 ### GitHub Environments
 
-Create two environments in your repository settings:
+Create two environments in your repository:
 
-#### 1. `dev`
+- **dev**: For development deployments. Add required secrets/variables and enable branch protection.
+- **prod**: For production deployments. Add required secrets/variables and enable stricter branch protection.
 
-- Used for development deployments.
-- Add required secrets and variables to this environment.
-- Enable branch protection rules (e.g., require pull request reviews before merging to `dev`).
+---
 
-#### 2. `prod`
+## Azure & Terraform Setup
 
-- Used for production deployments.
-- Add required secrets and variables to this environment.
-- Enable stricter branch protection rules (e.g., require status checks, pull request reviews, and deployment approvals before merging to `main`).
-
-### Steps to Deploy
-
-#### Login to Azure and set ARM_SUBSCRIPTION
-
-Logging in to Azure with priviliged access
+### Login to Azure
 
 ```sh
 az login
-```
-
-To get your all subscriptions on the account, run:
-
-```sh
 az account list --output table
-```
-
-To set your subscription ID, run:
-
-```sh
 export ARM_SUBSCRIPTION_ID=$(az account list --output tsv --query "[<subscription-index>].id")
 ```
 
-#### Create Terraform Service Principal on Azure
+### Create Prerequisties Resources
 
-A Service Principal in Azure is an identity used by applications, scripts, or automation tools to access Azure resources securely.
+The terraform plan in [](./terraform/bootstrap) has definitions for prerequisite resources:
 
-In the context of Terraform. a Service Principal allows Terraform to authenticate with Azure and manage resources (such as creating, updating, or deleting infrastructure) on your behalf, without using your personal credentials. This improves security and enables automated, repeatable deployments.
+- The remote backend configuration on Azure
+- The service principal for Terraform on CI/CD
+- The OIDC federated credentials for Terraform running through GitHub Actions
+- Resource Groups for allocating different resources to different environments (dev/prod)
+- The minimal roles assigned to the Terraform SP, which includes:
+  - Contributor role to the resource groups
+  - User Access role to the resource groups
+  - Data Blob Storage Contributor role to the backend storage container
 
-Utility script is provided:
+[Create backend resources](./scripts/terraform-bootstrap.sh)
 
-- [Create Terraform Service Principal](./scripts/create-terraform-sp.sh)
+### Create Infrastructure Environments
 
-**Note**: The output `terraform-sp.json` will contain sensitive information, use with caution
-
-Fill in the required variables from the output in the [repo config](./README.md#github-repository-configuration).
-
-#### Create OIDC federated credentials on Azure for Terraform Service Principal
-
-Configure OIDC authentication in your GitHub Actions workflows by referencing the [GitHub OIDC documentation](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers). This enables secure, short-lived authentication from GitHub to Azure without storing long-lived secrets.
-
-- [Create OIDC Provider](./scripts/create-oidc-provider.sh)
-
-**Note**: create two federated credentials for `dev` and `prod` environments, must match the environments defined [here](./README.md#github-environments).
-
-#### Create bootstrap storage container for holding environment backends
-
-Create an Azure Storage Account and container to store Terraform state files (remote backend). This ensures state consistency and enables team collaboration. Use the provided scripts to create the backend resources:
-
-- [Create backend resources](./scripts/create-terraform-backend.sh)
-
-#### Assign data contributor role to the Terraform SP
-
-Assign Data Contributor Role to allow Terraform SP to store and update the state from a central source of truth.
-
-- [Assign Data Contributor Role to the Terraform SP](./scripts/assign-role-to-terraform-sp.sh)
-
-#### Create the infrastructure environments (dev/prod)
-
-Use the provided workflows to create Terraform environments
+Use the provided workflows to create Terraform environments:
 
 - [Terraform Apply Environment](https://github.com/m-ahmedy/pwc-devops-task-infra/actions/workflows/terraform-apply-env.yaml)
 
-#### Get cluster kubeconfig
+---
 
-Use the provided script to get the AKS cluster kubeconfig, the required values can be found in the environment Terraform outputs:
+## Kubernetes & ArgoCD Setup
+
+### Get Cluster Kubeconfig
+
+Retrieve AKS cluster kubeconfig for dev and prod:
 
 - [Get Cluster Kubeconfig](./scripts/get-cluster-kubeconfig.sh)
 
-Test the new setup with:
+Test with:
 
 ```sh
 kubectl config get-contexts
 kubectl version
 ```
 
-#### Generate ACR tokens
+### Generate ACR Tokens
 
-To generate Azure Container Registry (ACR) tokens, use the provided utility script, the required values can be found in the environment Terraform outputs:
+Generate Azure Container Registry tokens:
 
 - [Generate ACR Token](./scripts/generate-docker-credentials.sh)
 
-Run the script and follow the prompts to obtain the required token values. Once generated, set these values as secrets or variables in your application repository to enable secure access to the ACR from your CI/CD workflows or Kubernetes cluster.
+Set these as secrets/variables in your application repo.
 
-#### Run the deployment workflow in the applicaiton code repo
+### Run Deployment Workflow
 
-It will create and push a fresh docker image to the ACR.
+Run the deployment workflow in the application code repo to build and push a Docker image to ACR.
 
-#### ArgoCD Setup
+### Install ArgoCD
 
-##### Install ArgoCD into the Cluster
-
-ArgoCD is a declarative, GitOps continuous delivery tool for Kubernetes. It automates the deployment of applications by syncing Kubernetes manifests from a Git repository to your cluster.
-
-To install ArgoCD, use the provided helper script:
+Install ArgoCD into your Kubernetes cluster, only on prod environment environment:
 
 - [Install ArgoCD](./scripts/install-argocd.sh)
 
-This script will deploy ArgoCD into your Kubernetes cluster and configure the necessary resources.
+### Log in to ArgoCD
 
-##### Create ArgoCD manifests
+Expose ArgoCD UI:
 
-You can generate ArgoCD manifests using the automation script provided in `./argocd/main.py`. This script helps you create templated ArgoCD Application manifests for different environments.
+```sh
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
 
-Set the required environment variables before running the script. Here is a sample:
+Get initial admin password:
+
+```sh
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath={.data.password} | base64 -d && echo
+```
+
+Log in:
+
+```sh
+argocd login localhost:8080 --username admin --password <ARGOCD_ADMIN_PASSWORD> --insecure
+```
+
+### Import Clusters
+
+Import clusters into ArgoCD using the CLI from your kubeconfig contexts:
+
+```sh
+# List available contexts
+kubectl config get-contexts
+
+# Import a context (replace <context-name> with your context)
+argocd cluster add <context-name>
+```
+
+Repeat for each environment (e.g., dev, prod) to allow ArgoCD to manage resources in those clusters.
+
+### Generate ArgoCD Manifests
+
+Generate ArgoCD manifests using the automation script:
 
 ```sh
 cd ./argocd
@@ -178,58 +198,29 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-- `REPO_URL`: HTTPS Repo URL
-- `REPO_NAME`: The name of the infra repo
-- `REPO_USERNAME`: The owner of the infra repo
-- `REPO_TOKEN`: The GitHub PAT created for ArgoCD
-- `PROJECT_NAME`: The name of the ArgoCD project
-- `APP_NAME`: App name
-- `DEST_NAMESPACE`: The namespace to create the app
-- `DEST_SERVER`: The server to create the app
-- `ENVIRONMENTS`: Environments to create the app into
+Set environment variables:
 
-The script will output ArgoCD Application manifests in the `./output/` directory. Review and apply these manifests to your cluster:
+- `REPO_URL`, `REPO_NAME`, `REPO_USERNAME`, `REPO_TOKEN`, `PROJECT_NAME`, `APP_NAME`, `DEST_NAMESPACE`, `DEST_SERVER`, `ENVIRONMENTS`
+
+Apply manifests:
 
 ```sh
 kubectl apply -f ./output/
 ```
 
-##### Log in to ArgoCD
+### Access the App
 
-To access the ArgoCD UI, expose the service or use port-forwarding:
-
-```sh
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
-
-To get the initial admin secret of ArgoCD:
-
-```sh
-kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath={.data.password} | base64 -d && echo
-```
-
-Log in to ArgoCD dashboard on `localhost:8080` or ArgoCD CLI:
-
-```sh
-argocd login localhost:8080 --username admin --password <ARGOCD_ADMIN_PASSWORD> --insecure
-```
-
-##### Access the App
-
-To access your application via the LoadBalancer service, retrieve its external IP address with:
+Get the LoadBalancer external IP:
 
 ```sh
 kubectl get svc -n simple-web-app -o jsonpath="{.items[?(@.spec.type=='LoadBalancer')].status.loadBalancer.ingress[0].ip}"
 ```
 
-Once the external IP is available, open it in your browser to access the deployed app.
-
-Available endpoints for this app are:
+Endpoints:
 
 ```
 http://<load-balancer-ip>:5000/users
 http://<load-balancer-ip>:5000/users/<user-id>
-
 http://<load-balancer-ip>:5000/products
 http://<load-balancer-ip>:5000/products/<product-id>
 ```
