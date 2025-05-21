@@ -4,11 +4,12 @@ metadata:
   name: app-of-apps
   namespace: argocd
 spec:
+  project: default
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
   source:
-    path: argocd/root
+    path: argocd/apps
     repoURL: https://github.com/m-ahmedy/pwc-devops-task-infra.git
     targetRevision: HEAD
   syncPolicy:

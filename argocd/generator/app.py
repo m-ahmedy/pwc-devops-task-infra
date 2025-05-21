@@ -50,9 +50,9 @@ variables = [
         "description": "the destination Kubernetes namespace",
     },
     {
-        "env_var": "DEST_SERVER",
-        "template_var": "dest_server",
-        "description": "the destination Kubernetes server",
+        "env_var": "DEST_CLUSTER_NAME",
+        "template_var": "dest_cluster_name",
+        "description": "the destination Kubernetes cluster name",
     },
     {
         "env_var": "ENVIRONMENTS",

@@ -16,7 +16,7 @@ spec:
     path: kustomize/{{ app_name }}/overlays/{{ environment }}
 
   destination:
-    server: {{ dest_server }}
+    name: {{ dest_cluster_name }}
     namespace: {{ dest_namespace }}
 
   syncPolicy:

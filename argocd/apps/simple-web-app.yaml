@@ -1,0 +1,58 @@
+
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-simple-web-app
+  namespace: argocd
+  labels:
+    name: simple-web-app
+spec:
+  project: pwc-task
+
+  source:
+    repoURL: https://github.com/m-ahmedy/pwc-devops-task-infra.git
+    targetRevision: HEAD
+    path: kustomize/simple-web-app/overlays/dev
+
+  destination:
+    name: pwc-dev-cluster
+    namespace: simple-web-app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
+
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-simple-web-app
+  namespace: argocd
+  labels:
+    name: simple-web-app
+spec:
+  project: pwc-task
+
+  source:
+    repoURL: https://github.com/m-ahmedy/pwc-devops-task-infra.git
+    targetRevision: HEAD
+    path: kustomize/simple-web-app/overlays/prod
+
+  destination:
+    name: pwc-prod-cluster
+    namespace: simple-web-app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
