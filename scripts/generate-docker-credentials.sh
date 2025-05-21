@@ -3,6 +3,10 @@
 set -e
 
 read -p "Enter the ACR name: " ACR_NAME
+
+echo "Available tokens for registry '$ACR_NAME':"
+az acr token list --registry $ACR_NAME --output table
+echo
 read -p "Enter token name: " TOKEN_NAME
 
 response=$(az acr token credential generate \
@@ -16,7 +20,7 @@ username=$(echo $response | jq -r ".username")
 password=$(echo $response | jq -r ".passwords[0].value")
 acr_login_server=$ACR_NAME.azurecr.io
 
-echo "In your GitHub repository, go to Settings > Secrets and variables > Actions."
+echo "In your app code GitHub repository, go to Settings > Secrets and variables > Actions."
 
 echo "Add a new variable named 'ACR_USERNAME' with the username value: $username"
 echo "Add a new variable named 'ACR_LOGIN_SERVER' with the server value: $acr_login_server"
