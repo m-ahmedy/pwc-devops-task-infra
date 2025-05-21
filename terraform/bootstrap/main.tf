@@ -91,7 +91,7 @@ resource "azurerm_role_assignment" "user_access_admin" {
 }
 
 resource "azurerm_role_assignment" "data_blob_access" {
-  scope                = azurerm_storage_container.tf_state.id
+  scope                = azurerm_storage_container.tf_state.resource_manager_id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.tf_sp.object_id
 }
