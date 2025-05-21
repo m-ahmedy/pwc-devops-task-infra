@@ -5,7 +5,7 @@
 **/.terraform/
 
 
-argocd/output/**
+argocd/generator/output/**
 
 **/.env
 

@@ -1,6 +1,6 @@
 
 resource "azurerm_container_registry_scope_map" "acr_rw_scope_map" {
-  name                    = "acr-scope-map"
+  name                    = format("%s-acr-scope-map", var.environment)
   container_registry_name = var.acr_name
   resource_group_name     = var.acr_registry_group
   actions = [

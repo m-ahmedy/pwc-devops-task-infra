@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  source:
+    path: argocd/root
+    repoURL: https://github.com/m-ahmedy/pwc-devops-task-infra.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
