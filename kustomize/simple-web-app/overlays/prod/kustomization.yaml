@@ -3,4 +3,4 @@ resources:
 namePrefix: prod-
 images:
   - name: pwcdevacr.azurecr.io/simple-web-app
-    newTag: latest
+    newTag: v1.1.2
